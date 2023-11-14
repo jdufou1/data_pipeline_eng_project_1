@@ -8,7 +8,7 @@
             name: Build and Push to GCP
             runs-on: ubuntu-latest
             env: 
-                CLOUD_SERVICE: dev-docker-image-api
+                CLOUD_SERVICE: cloud-docker-pipeline-data-image-api
                 IMAGE_NAME:  dev_docker_airflow_1
                 PROJECT_ID: primeval-argon-358717
             steps:
