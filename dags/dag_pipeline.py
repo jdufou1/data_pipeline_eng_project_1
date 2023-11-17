@@ -47,20 +47,22 @@ with DAG(
         # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
         # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
-        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml")
-
-        if response.status_code == 200:
-            # Chargez les informations depuis le contenu téléchargé
-            content = response.content.decode("utf-8")
-            # Load the yaml
-            credentials = yaml.safe_load(content)
-        else:
-            print(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
-
+        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml",allow_redirects=True)
+        try:
+            if response.status_code == 200:
+                # Chargez les informations depuis le contenu téléchargé
+                content = response.content.decode("utf-8")
+                # Load the yaml
+                credentials = yaml.safe_load(content)
+            else:
+                raise ValueError(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
+        except Exception as e:
+            print(f"Une erreur s'est produite : {e}")
+            # Ajoutez ici le code de gestion des erreurs spécifiques si nécessaire
 
         
         BUCKET_NAME = credentials["source_bucket_name"]
-        ID_PROJECT = credentials["id_project"]
+        # ID_PROJECT = credentials["id_project"]
         # SnowFlake
 
         ORGNAME = credentials["name_organisation"]
