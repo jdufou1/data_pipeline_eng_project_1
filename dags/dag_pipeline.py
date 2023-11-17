@@ -51,7 +51,9 @@ with DAG(
 
         if response.status_code == 200:
             # Chargez les informations depuis le contenu téléchargé
-            credentials = yaml.safe_load(response.text)
+            content = response.content.decode("utf-8")
+            # Load the yaml
+            credentials = yaml.safe_load(content)
         else:
             print(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
 
@@ -73,57 +75,8 @@ with DAG(
 
         NAME_TABLE = credentials["name_table"]
 
-
-
-
-
-
-
-
-
-
         def extract(file):
             return read_json_from_gcs(BUCKET_NAME, file)
-
-
-        # def transform_spark(spark, json_obj):
-        #     json_data = json.dumps(json_obj)
-
-        #     # Charger le JSON dans un RDD
-        #     rdd = spark.sparkContext.parallelize([json_data])
-
-        #     # Convertir le RDD en DataFrame
-        #     df = spark.read.json(rdd)
-
-
-        #     # drop columns
-
-        #     df = df.filter(df["current_status"] == "Finished")
-
-        #     df_without_columns = df.drop("match_hour", "current_status")
-
-        #     # drop lines with no values
-        #     df_2 = df_without_columns.na.drop()
-
-        #     df_2 = df_2.withColumn("participant_away_current_score", col("participant_away_current_score").cast("int"))
-        #     df_2 = df_2.withColumn("participant_home_current_score", col("participant_home_current_score").cast("int"))
-
-        #     desired_column_order = ["current_country", "current_tournament", "participant_home", "participant_home_current_score", "participant_away", "participant_away_current_score"]
-        #     desired_column_name = ["COUNTRY_MATCH", "TOURNAMENT", "NAME_TEAM_HOME", "SCORE_TEAM_HOME", "NAME_TEAM_AWAY", "SCORE_TEAM_AWAY"]
-
-        #     # Reorder the columns using the select method
-        #     df_3 = df_2.select(*desired_column_order)
-
-        #     column_mapping = dict(zip(desired_column_order, desired_column_name))
-
-        #     # Rename all columns in the DataFrame
-        #     df_renamed = df_3
-        #     for old_col, new_col in column_mapping.items():
-        #         df_renamed = df_renamed.withColumnRenamed(old_col, new_col)
-
-
-        #     return df_renamed
-
 
         def transform_pandas(json_obj):
             # Convert JSON object to a string
@@ -159,8 +112,6 @@ with DAG(
 
             return df
 
-
-
         def load(df):
 
             # Créer une connexion à Snowflake
@@ -195,33 +146,12 @@ with DAG(
             conn.close()
             print("fermeture")
             
-
-
-
         def ETL_pipeline(list_files):
             for file in list_files:
                 # Appel de la fonction
                 json_obj = extract(file)
                 df = transform_pandas(json_obj)
                 load(df)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         def get_files_published_today(bucket_name):
             response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials-google-cloud.json")
