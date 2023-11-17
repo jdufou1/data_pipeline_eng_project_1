@@ -5,15 +5,24 @@ import json
 import snowflake.connector
 import yaml
 import os
+import requests
 
 # PATH_CREDENTIALS_GLOBAL = "./dags/credentials/credentials.yml"
 # PATH_CREDENTIALS_GCLOUD = "./dags/credentials/credentials-google-cloud.json"
-current_directory = os.path.dirname(os.path.abspath(__file__))
-PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
-PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json")
+# current_directory = os.path.dirname(os.path.abspath(__file__))
+# PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
+# PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json")
 
-with open(PATH_CREDENTIALS_GLOBAL, "r") as fichier:
-    credentials = yaml.safe_load(fichier)
+# Téléchargez le contenu du fichier depuis l'URL
+response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials.yml")
+
+if response.status_code == 200:
+    # Chargez les informations depuis le contenu téléchargé
+    credentials = yaml.safe_load(response.text)
+else:
+    print(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
+
+
 
 BUCKET_NAME = credentials["source_bucket_name"]
 ID_PROJECT = credentials["id_project"]
@@ -33,9 +42,24 @@ NAME_TABLE = credentials["name_table"]
 
 
 
-def read_json_from_gcs(bucket_name, file_path, credentials_path):
+def read_json_from_gcs(bucket_name, file_path):
     # Créez une instance du client GCS avec les informations d'identification
-    client = storage.Client.from_service_account_json(credentials_path)
+    # Téléchargez le contenu du fichier depuis l'URL
+    response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials-google-cloud.json")
+
+    if response.status_code == 200:
+        # Initialisez le client de stockage avec les informations téléchargées
+        credentials = response.json()
+        client = storage.Client.from_service_account_info(credentials)
+
+        # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
+        bucket = client.get_bucket('nom_du_seau')
+        blobs = bucket.list_blobs()
+
+        for blob in blobs:
+            print(blob.name)
+    else:
+        print(f"Erreur lors du téléchargement du fichier d'informations d'identification depuis l'URL. Code d'état : {response.status_code}")
 
     # Obtenez le seau
     bucket = client.get_bucket(bucket_name)
@@ -53,7 +77,7 @@ def read_json_from_gcs(bucket_name, file_path, credentials_path):
 
 
 def extract(file):
-    return read_json_from_gcs(BUCKET_NAME, file, PATH_CREDENTIALS_GCLOUD)
+    return read_json_from_gcs(BUCKET_NAME, file)
 
 
 # def transform_spark(spark, json_obj):

@@ -11,7 +11,7 @@ import yaml
 
 import os
 
-
+import requests
 
 
 default_args = {
@@ -42,19 +42,37 @@ with DAG(
         current_directory = os.path.dirname(os.path.abspath(__file__))
         
 
-        PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
-        PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
+        # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
+        # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
-        with open(PATH_CREDENTIALS_GLOBAL, "r") as fichier:
-            credentials = yaml.safe_load(fichier)
+        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials.yml")
+
+        if response.status_code == 200:
+            # Chargez les informations depuis le contenu téléchargé
+            credentials = yaml.safe_load(response.text)
+        else:
+            print(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
 
         start_date = datetime.now()
 
         BUCKET_NAME = credentials["source_bucket_name"]
 
 
-        def get_files_published_today(bucket_name, credentials_path):
-            client = storage.Client.from_service_account_json(credentials_path)
+        def get_files_published_today(bucket_name):
+            response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials-google-cloud.json")
+            if response.status_code == 200:
+                # Initialisez le client de stockage avec les informations téléchargées
+                credentials = response.json()
+                client = storage.Client.from_service_account_info(credentials)
+
+                # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
+                bucket = client.get_bucket('nom_du_seau')
+                blobs = bucket.list_blobs()
+
+                for blob in blobs:
+                    print(blob.name)
+            else:
+                print(f"Erreur lors du téléchargement du fichier d'informations d'identification depuis l'URL. Code d'état : {response.status_code}")
 
             bucket = client.get_bucket(bucket_name)
 
@@ -69,7 +87,7 @@ with DAG(
             return file_names_today_and_yesterday
 
 
-        files_published_today = get_files_published_today(BUCKET_NAME, PATH_CREDENTIALS_GCLOUD)
+        files_published_today = get_files_published_today(BUCKET_NAME)
         ETL_pipeline(files_published_today)
 
 
