@@ -35,8 +35,8 @@ with DAG(
         
         
 
-        PATH_CREDENTIALS_GLOBAL = "/app/airflow/credentials/credentials.yml"
-        PATH_CREDENTIALS_GCLOUD = "/app/airflow/credentials/credentials-google-cloud.json"
+        PATH_CREDENTIALS_GLOBAL = "/app/airflow/dags/credentials/credentials.yml"
+        PATH_CREDENTIALS_GCLOUD = "/app/airflow/dags/credentials/credentials-google-cloud.json"
 
         with open(PATH_CREDENTIALS_GLOBAL, "r") as fichier:
             credentials = yaml.safe_load(fichier)
