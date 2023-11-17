@@ -1,53 +1,101 @@
 ---
-    name: Build and Push Python Image to Google Cloud Platform
+    name: Update Cloud Composer DAGs
+
     on:
-        push:
-            branches: [ main ]
+      push:
+        branches:
+          - main
+
     jobs:
-        build-push-gcr:
-            name: Build and Push to GCP
-            runs-on: ubuntu-latest
-            env: 
-                CLOUD_SERVICE: cloud-docker-pipeline-data-image-api
-                IMAGE_NAME:  dev_docker_airflow_1
-                PROJECT_ID: primeval-argon-358717
-            steps:
-            - name: Checkout
-              uses: actions/checkout@v2
+      update_dags:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v2
+
+          - name: install the google client CLI
+            uses: google-github-actions/setup-gcloud@v0
+            with:
+              project_id: ${{ secrets.GOOGLE_PROJECT }}
+              service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+              export_default_credentials: true
+
+          - name: Copy DAGs to Cloud Storage
+            run: |
+              gsutil -m cp -r dags/* gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
+
+          - name: Import DAGs to Cloud Composer
+            run: |
+              gcloud composer environments storage dags import \
+                --environment composer-1.20.12-airflow-2.4.3 \
+                --location europe-west6 \
+                --source gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ---
+#     name: Build and Push Python Image to Google Cloud Platform
+#     on:
+#         push:
+#             branches: [ main ]
+#     jobs:
+#         build-push-gcr:
+#             name: Build and Push to GCP
+#             runs-on: ubuntu-latest
+#             env: 
+#                 CLOUD_SERVICE: cloud-docker-pipeline-data-image-api
+#                 IMAGE_NAME:  dev_docker_airflow_1
+#                 PROJECT_ID: primeval-argon-358717
+#             steps:
+#             - name: Checkout
+#               uses: actions/checkout@v2
     
     
-            - name: install the google client CLI
-              uses: google-github-actions/setup-gcloud@v0
-              with:
-                project_id: ${{ secrets.GOOGLE_PROJECT }}
-                service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-                export_default_credentials: true
+#             - name: install the google client CLI
+#               uses: google-github-actions/setup-gcloud@v0
+#               with:
+#                 project_id: ${{ secrets.GOOGLE_PROJECT }}
+#                 service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+#                 export_default_credentials: true
     
-            - name: Build Docker Image
-              run: docker build -t $IMAGE_NAME:latest .
+#             - name: Build Docker Image
+#               run: docker build -t $IMAGE_NAME:latest .
     
-            - name: Configure Docker Client
-              run: |-
-                gcloud auth configure-docker europe-west9-docker.pkg.dev --quiet
+#             - name: Configure Docker Client
+#               run: |-
+#                 gcloud auth configure-docker europe-west9-docker.pkg.dev --quiet
     
-            - name: Push Docker Image to Artifact Registry (GCR)
-              env: 
-                GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
+#             - name: Push Docker Image to Artifact Registry (GCR)
+#               env: 
+#                 GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
                 
-                IMAGE_REPO: depot-docker-pipeline-data-image-api
-                GIT_TAG: v0.1.0
-              run: |-
-                docker tag $IMAGE_NAME:latest europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:latest
-                docker tag $IMAGE_NAME:latest europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:$GIT_TAG
-                docker push europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:latest
-                docker push europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:$GIT_TAG
+#                 IMAGE_REPO: depot-docker-pipeline-data-image-api
+#                 GIT_TAG: v0.1.0
+#               run: |-
+#                 docker tag $IMAGE_NAME:latest europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:latest
+#                 docker tag $IMAGE_NAME:latest europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:$GIT_TAG
+#                 docker push europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:latest
+#                 docker push europe-west9-docker.pkg.dev/$GOOGLE_PROJECT/$IMAGE_REPO/$IMAGE_NAME:$GIT_TAG
     
-            - name: Deploy to Cloud Run
-              uses: google-github-actions/deploy-cloudrun@v1
-              env: 
-                GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
-                IMAGE_REPO: depot-docker-pipeline-data-image-api
-              with:
-                service: ${{env.CLOUD_SERVICE}}
-                image: europe-west9-docker.pkg.dev/${{env.GOOGLE_PROJECT}}/${{env.IMAGE_REPO}}/${{env.IMAGE_NAME}}:latest
-                region: europe-west9
+#             - name: Deploy to Cloud Run
+#               uses: google-github-actions/deploy-cloudrun@v1
+#               env: 
+#                 GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
+#                 IMAGE_REPO: depot-docker-pipeline-data-image-api
+#               with:
+#                 service: ${{env.CLOUD_SERVICE}}
+#                 image: europe-west9-docker.pkg.dev/${{env.GOOGLE_PROJECT}}/${{env.IMAGE_REPO}}/${{env.IMAGE_NAME}}:latest
+#                 region: europe-west9
