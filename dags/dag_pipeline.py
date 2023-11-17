@@ -4,20 +4,12 @@ from airflow import DAG
 from airflow.decorators import task
 from airflow.operators.bash import BashOperator
 
-# from etl_functions import ETL_pipeline
+from google.cloud import storage
+import snowflake.connector
 
 import os
-
-import requests
-
 import pandas as pd
-
-from google.cloud import storage
 import json
-import snowflake.connector
-import yaml
-import requests
-
 
 default_args = {
     "owner": "jdufou1",
@@ -206,13 +198,6 @@ def read_json_from_gcs(bucket_name, file_path):
 
     client = storage.Client.from_service_account_info(credentials)
 
-    # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
-    bucket = client.get_bucket('nom_du_seau')
-    blobs = bucket.list_blobs()
-
-    for blob in blobs:
-        print(blob.name)
-
     # Obtenez le seau
     bucket = client.get_bucket(bucket_name)
 
@@ -226,35 +211,3 @@ def read_json_from_gcs(bucket_name, file_path):
     data = json.loads(json_content)
 
     return data
-
-
-def read_file_from_gcs(bucket_name, file_path):
-    # Initialiser le client Google Cloud Storage
-    credentials_json_str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
-    # Vérifiez si la variable d'environnement est définie
-    if credentials_json_str is None:
-        raise ValueError("La variable d'environnement GOOGLE_APPLICATION_CREDENTIALS_JSON n'est pas définie.")
-
-    # Chargez la clé JSON depuis la chaîne JSON
-    credentials = json.loads(credentials_json_str)
-
-    client = storage.Client.from_service_account_info(credentials)
-
-    # Obtenir une référence au seau (bucket)
-    bucket = client.get_bucket(bucket_name)
-
-    # Obtenir une référence à l'objet (fichier) dans le seau
-    blob = bucket.blob(file_path)
-
-    try:
-        # Télécharger le contenu du fichier
-        content = blob.download_as_text()
-
-        # Afficher le contenu du fichier
-        print(content)
-
-        # Vous pouvez également retourner le contenu si vous en avez besoin dans votre application
-        return content
-
-    except Exception as e:
-        print(f"Une erreur s'est produite lors de la lecture du fichier : {e}")
