@@ -25,6 +25,12 @@
             run: |
               gsutil -m cp -r dags/* gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
 
+          - name: Install Python packages
+            run: |
+              gcloud composer environments update airflow-data-eng \
+                --update-pypi-packages-from-file=requirements.txt \
+                --location europe-west6
+
           - name: Import DAGs to Cloud Composer
             run: |
               gcloud composer environments storage dags import \
