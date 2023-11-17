@@ -23,7 +23,7 @@
 
           - name: Copy DAGs to Cloud Storage
             run: |
-              gsutil -m cp -r dags/* gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
+              gsutil -m cp -r dags/ gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
 
           # - name: Install Python packages
           #   run: |
