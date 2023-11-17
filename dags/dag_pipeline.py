@@ -47,35 +47,36 @@ with DAG(
         # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
         # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
-        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml",allow_redirects=True)
-        try:
-            if response.status_code == 200:
-                # Chargez les informations depuis le contenu téléchargé
-                content = response.content.decode("utf-8")
-                # Load the yaml
-                credentials = yaml.safe_load(content)
-            else:
-                raise ValueError(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
-        except Exception as e:
-            print(f"Une erreur s'est produite : {e} - {content}")
-            # Ajoutez ici le code de gestion des erreurs spécifiques si nécessaire
+        # response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml",allow_redirects=True)
+        # try:
+        #     if response.status_code == 200:
+        #         # Chargez les informations depuis le contenu téléchargé
+        #         content = response.content.decode("utf-8")
+        #         # Load the yaml
+        #         credentials = yaml.safe_load(content)
+        #     else:
+        #         raise ValueError(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
+        # except Exception as e:
+        #     print(f"Une erreur s'est produite : {e} - {content}")
+        #     # Ajoutez ici le code de gestion des erreurs spécifiques si nécessaire
+
 
         
-        BUCKET_NAME = credentials["source_bucket_name"]
-        # ID_PROJECT = credentials["id_project"]
+        BUCKET_NAME = "data-flashscore"
+        # ID_PROJECT = "primeval-argon-358717"
         # SnowFlake
 
-        ORGNAME = credentials["name_organisation"]
-        ACCOUNT_NAME = credentials["name_account"]
+        ORGNAME = "QXGHBSB"
+        ACCOUNT_NAME = "EF08275"
 
         ACCOUNT_IDENTIFIER = f"{ORGNAME}-{ACCOUNT_NAME}"
-        PASSWORD = credentials["password_user"]
-        USER = credentials["id_user"]
+        PASSWORD = "Jyde-7819020!"
+        USER ="JDUFOU1"
 
-        WH = credentials["name_warehouse"]
-        DB = credentials["name_database"]
+        WH = "COMPUTE_WH"
+        DB = "FLASH_SCORE_DB"
 
-        NAME_TABLE = credentials["name_table"]
+        NAME_TABLE = "MATCHES_FINISHED"
 
         def extract(file):
             return read_json_from_gcs(BUCKET_NAME, file)
@@ -234,3 +235,25 @@ def read_json_from_gcs(bucket_name, file_path):
     return data
 
 
+def read_file_from_gcs(bucket_name, file_path):
+    # Initialiser le client Google Cloud Storage
+    client = storage.Client()
+
+    # Obtenir une référence au seau (bucket)
+    bucket = client.get_bucket(bucket_name)
+
+    # Obtenir une référence à l'objet (fichier) dans le seau
+    blob = bucket.blob(file_path)
+
+    try:
+        # Télécharger le contenu du fichier
+        content = blob.download_as_text()
+
+        # Afficher le contenu du fichier
+        print(content)
+
+        # Vous pouvez également retourner le contenu si vous en avez besoin dans votre application
+        return content
+
+    except Exception as e:
+        print(f"Une erreur s'est produite lors de la lecture du fichier : {e}")
