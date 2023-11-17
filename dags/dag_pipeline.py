@@ -9,6 +9,11 @@ from google.cloud import storage
 
 import yaml
 
+import os
+
+
+
+
 default_args = {
     "owner": "jdufou1",
     "retries": 5,
@@ -33,10 +38,12 @@ with DAG(
     @task()
     def task_daily_file_process():
         
+        # Obtenez le chemin du répertoire courant
+        current_directory = os.path.dirname(os.path.abspath(__file__))
         
 
-        PATH_CREDENTIALS_GLOBAL = "./dags/credentials/credentials.yml"
-        PATH_CREDENTIALS_GCLOUD = "./dags/credentials/credentials-google-cloud.json"
+        PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
+        PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
         with open(PATH_CREDENTIALS_GLOBAL, "r") as fichier:
             credentials = yaml.safe_load(fichier)
