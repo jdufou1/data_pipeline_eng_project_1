@@ -38,10 +38,6 @@ with DAG(
     @task()
     def task_daily_file_process():
         
-        # Obtenez le chemin du répertoire courant
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        
-
         # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
         # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
@@ -53,7 +49,6 @@ with DAG(
         else:
             print(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
 
-        start_date = datetime.now()
 
         BUCKET_NAME = credentials["source_bucket_name"]
 
