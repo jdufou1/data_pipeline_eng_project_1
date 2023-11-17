@@ -28,7 +28,7 @@
           - name: Import DAGs to Cloud Composer
             run: |
               gcloud composer environments storage dags import \
-                --environment composer-1.20.12-airflow-2.4.3 \
+                --environment airflow-data-eng \
                 --location europe-west6 \
                 --source gs://europe-west6-airflow-data-e-f3099903-bucket/dags/
 
