@@ -4,7 +4,10 @@ from airflow import DAG
 from airflow.decorators import task
 from airflow.operators.bash import BashOperator
 
+from etl_functions import ETL_pipeline
+from google.cloud import storage
 
+import yaml
 
 default_args = {
     "owner": "jdufou1",
@@ -30,10 +33,7 @@ with DAG(
     @task()
     def task_daily_file_process():
         
-        from etl_functions import ETL_pipeline
-        from google.cloud import storage
-
-        import yaml
+        
 
         PATH_CREDENTIALS_GLOBAL = "/app/airflow/credentials/credentials.yml"
         PATH_CREDENTIALS_GCLOUD = "/app/airflow/credentials/credentials-google-cloud.json"
@@ -52,10 +52,10 @@ with DAG(
             bucket = client.get_bucket(bucket_name)
 
             today = datetime.now().date()
-            # yesterday = today - timedelta(days=1)
+            yesterday = today - timedelta(days=1)
 
             blobs_today_and_yesterday = [blob for blob in bucket.list_blobs()
-                                        if blob.updated.date() == today]
+                                        if blob.updated.date() == today or blob.updated.date() == yesterday]
 
             file_names_today_and_yesterday = [blob.name for blob in blobs_today_and_yesterday]
 
@@ -69,7 +69,7 @@ with DAG(
 
     ending_task = BashOperator(
         task_id="ending_task",
-        bash_command="echo Starting task"
+        bash_command="echo Ending task"
     )
 
     starting_task >> task_daily_file_process() >> ending_task
