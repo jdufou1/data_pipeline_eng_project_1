@@ -32,6 +32,7 @@
           #     gcloud composer environments update airflow-data-eng \
           #       --update-pypi-packages-from-file=requirements.txt \
           #       --location europe-west6
+          # test comment
 
           - name: Import DAGs to Cloud Composer
             run: |
