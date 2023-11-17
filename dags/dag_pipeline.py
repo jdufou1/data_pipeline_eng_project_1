@@ -57,7 +57,7 @@ with DAG(
             else:
                 raise ValueError(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
         except Exception as e:
-            print(f"Une erreur s'est produite : {e}")
+            print(f"Une erreur s'est produite : {e} - {content}")
             # Ajoutez ici le code de gestion des erreurs spécifiques si nécessaire
 
         
