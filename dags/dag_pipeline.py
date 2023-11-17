@@ -41,7 +41,7 @@ with DAG(
         # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
         # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
 
-        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials.yml")
+        response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml")
 
         if response.status_code == 200:
             # Chargez les informations depuis le contenu téléchargé
@@ -54,7 +54,7 @@ with DAG(
 
 
         def get_files_published_today(bucket_name):
-            response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials-google-cloud.json")
+            response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials-google-cloud.json")
             if response.status_code == 200:
                 # Initialisez le client de stockage avec les informations téléchargées
                 credentials = response.json()

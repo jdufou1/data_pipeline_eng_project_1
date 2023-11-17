@@ -14,7 +14,7 @@ import requests
 # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json")
 
 # Téléchargez le contenu du fichier depuis l'URL
-response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials.yml")
+response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml")
 
 if response.status_code == 200:
     # Chargez les informations depuis le contenu téléchargé
@@ -45,7 +45,7 @@ NAME_TABLE = credentials["name_table"]
 def read_json_from_gcs(bucket_name, file_path):
     # Créez une instance du client GCS avec les informations d'identification
     # Téléchargez le contenu du fichier depuis l'URL
-    response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/dags/credentials/credentials-google-cloud.json")
+    response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials-google-cloud.json")
 
     if response.status_code == 200:
         # Initialisez le client de stockage avec les informations téléchargées
