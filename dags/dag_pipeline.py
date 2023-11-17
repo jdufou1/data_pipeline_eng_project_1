@@ -5,9 +5,8 @@ from airflow.decorators import task
 from airflow.operators.bash import BashOperator
 
 # from etl_functions import ETL_pipeline
-from google.cloud import storage
 
-import yaml
+import os
 
 import requests
 
@@ -157,20 +156,15 @@ with DAG(
                 load(df)
 
         def get_files_published_today(bucket_name):
-            response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials-google-cloud.json")
-            if response.status_code == 200:
-                # Initialisez le client de stockage avec les informations téléchargées
-                credentials = response.json()
-                client = storage.Client.from_service_account_info(credentials)
+            credentials_json_str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+            # Vérifiez si la variable d'environnement est définie
+            if credentials_json_str is None:
+                raise ValueError("La variable d'environnement GOOGLE_APPLICATION_CREDENTIALS_JSON n'est pas définie.")
 
-                # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
-                bucket = client.get_bucket('nom_du_seau')
-                blobs = bucket.list_blobs()
+            # Chargez la clé JSON depuis la chaîne JSON
+            credentials = json.loads(credentials_json_str)
 
-                for blob in blobs:
-                    print(blob.name)
-            else:
-                print(f"Erreur lors du téléchargement du fichier d'informations d'identification depuis l'URL. Code d'état : {response.status_code}")
+            client = storage.Client.from_service_account_info(credentials)
 
             bucket = client.get_bucket(bucket_name)
 
@@ -202,23 +196,22 @@ with DAG(
 
 
 def read_json_from_gcs(bucket_name, file_path):
-    # Créez une instance du client GCS avec les informations d'identification
-    # Téléchargez le contenu du fichier depuis l'URL
-    response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials-google-cloud.json")
+    credentials_json_str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    # Vérifiez si la variable d'environnement est définie
+    if credentials_json_str is None:
+        raise ValueError("La variable d'environnement GOOGLE_APPLICATION_CREDENTIALS_JSON n'est pas définie.")
 
-    if response.status_code == 200:
-        # Initialisez le client de stockage avec les informations téléchargées
-        credentials = response.json()
-        client = storage.Client.from_service_account_info(credentials)
+    # Chargez la clé JSON depuis la chaîne JSON
+    credentials = json.loads(credentials_json_str)
 
-        # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
-        bucket = client.get_bucket('nom_du_seau')
-        blobs = bucket.list_blobs()
+    client = storage.Client.from_service_account_info(credentials)
 
-        for blob in blobs:
-            print(blob.name)
-    else:
-        print(f"Erreur lors du téléchargement du fichier d'informations d'identification depuis l'URL. Code d'état : {response.status_code}")
+    # Maintenant, vous pouvez utiliser le client pour effectuer des opérations sur le stockage
+    bucket = client.get_bucket('nom_du_seau')
+    blobs = bucket.list_blobs()
+
+    for blob in blobs:
+        print(blob.name)
 
     # Obtenez le seau
     bucket = client.get_bucket(bucket_name)
@@ -237,7 +230,15 @@ def read_json_from_gcs(bucket_name, file_path):
 
 def read_file_from_gcs(bucket_name, file_path):
     # Initialiser le client Google Cloud Storage
-    client = storage.Client()
+    credentials_json_str = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    # Vérifiez si la variable d'environnement est définie
+    if credentials_json_str is None:
+        raise ValueError("La variable d'environnement GOOGLE_APPLICATION_CREDENTIALS_JSON n'est pas définie.")
+
+    # Chargez la clé JSON depuis la chaîne JSON
+    credentials = json.loads(credentials_json_str)
+
+    client = storage.Client.from_service_account_info(credentials)
 
     # Obtenir une référence au seau (bucket)
     bucket = client.get_bucket(bucket_name)
