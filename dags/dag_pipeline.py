@@ -24,7 +24,7 @@ with DAG(
     default_args=default_args,
     description="send flashscore data from GCS to Snowflake",
     start_date=start_date,
-    schedule_interval="50 23 * * *"
+    schedule_interval="*/2 * * * *"# "50 23 * * *"
 ) as dag :
     
     starting_task = BashOperator(
