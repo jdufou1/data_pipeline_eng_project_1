@@ -6,7 +6,7 @@ from airflow.operators.bash import BashOperator
 
 from google.cloud import storage
 import snowflake.connector
-
+import pendulum
 import os
 import pandas as pd
 import json
@@ -23,7 +23,8 @@ with DAG(
     dag_id="dag_pipeline_v1",
     default_args=default_args,
     description="send flashscore data from GCS to Snowflake",
-    start_date=start_date,
+    start_date= pendulum.datetime(2023, 11, 18, tz="UTC"), # start_date,
+    catchup=True,
     schedule_interval="*/2 * * * *"# "50 23 * * *"
 ) as dag :
     
@@ -34,23 +35,6 @@ with DAG(
 
     @task()
     def task_daily_file_process():
-        
-        # PATH_CREDENTIALS_GLOBAL = os.path.join(current_directory, "credentials", "credentials.yml")
-        # PATH_CREDENTIALS_GCLOUD = os.path.join(current_directory, "credentials", "credentials-google-cloud.json") # "./dags/credentials/credentials-google-cloud.json"
-
-        # response = requests.get("https://storage.cloud.google.com/europe-west6-airflow-data-e-f3099903-bucket/credentials/credentials.yml",allow_redirects=True)
-        # try:
-        #     if response.status_code == 200:
-        #         # Chargez les informations depuis le contenu téléchargé
-        #         content = response.content.decode("utf-8")
-        #         # Load the yaml
-        #         credentials = yaml.safe_load(content)
-        #     else:
-        #         raise ValueError(f"Erreur lors du téléchargement du fichier credentials depuis l'URL. Code d'état : {response.status_code}")
-        # except Exception as e:
-        #     print(f"Une erreur s'est produite : {e} - {content}")
-        #     # Ajoutez ici le code de gestion des erreurs spécifiques si nécessaire
-
 
         
         BUCKET_NAME = "data-flashscore"
@@ -173,8 +157,6 @@ with DAG(
 
         files_published_today = get_files_published_today(BUCKET_NAME)
         ETL_pipeline(files_published_today)
-
-
 
     ending_task = BashOperator(
         task_id="ending_task",
