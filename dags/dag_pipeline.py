@@ -23,8 +23,8 @@ with DAG(
     dag_id="dag_pipeline_v1",
     default_args=default_args,
     description="send flashscore data from GCS to Snowflake",
-    start_date= datetime.now(), # pendulum.datetime(2023, 11, 18, tz="UTC"), # start_date,
-    catchup=True,
+    start_date= pendulum.datetime(2023, 1, 1, tz="UTC"), # pendulum.datetime(2023, 11, 18, tz="UTC"), # start_date,
+    catchup=False,
     schedule_interval="*/2 * * * *"# "50 23 * * *"
 ) as dag :
     
