@@ -28,7 +28,7 @@ with DAG(
     description="send flashscore data from GCS to Snowflake",
     start_date= pendulum.datetime(2023, 1, 1, tz="UTC"), # pendulum.datetime(2023, 11, 18, tz="UTC"), # start_date,
     catchup=False,
-    schedule_interval="0 * * * *"# "50 23 * * *"
+    schedule_interval="0 */8 * * *"# "50 23 * * *"
 ) as dag :
     
     starting_task = BashOperator(
