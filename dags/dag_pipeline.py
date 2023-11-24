@@ -69,7 +69,7 @@ with DAG(
             original_df = pd.read_json(json_data, orient='records')
             print("original_df : ",original_df.columns)
             # Filter rows where 'current_status' is 'Finished'
-            df = original_df[original_df['current_status'] == "Termin\u00e9"]
+            df = original_df[original_df['current_status'] == "Finished"]
 
             # Drop columns
             # columns_to_drop = ['match_hour', 'current_status']
@@ -162,7 +162,7 @@ with DAG(
             # Load JSON data into a pandas DataFrame
             original_df = pd.read_json(json_data, orient='records')
 
-            df = original_df[original_df['current_status'] == "Termin\u00e9"]
+            df = original_df[original_df['current_status'] == "Finished"]
 
             columns_to_keep = ["lineups_data"]
 
@@ -199,7 +199,7 @@ with DAG(
             # Load JSON data into a pandas DataFrame
             original_df = pd.read_json(json_data, orient='records')
 
-            df = original_df[original_df['current_status'] == 'Termin\u00e9']
+            df = original_df[original_df['current_status'] == 'Finished']
 
             columns_to_keep = ["bookmakers_data"]
 
